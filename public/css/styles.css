@@ -1,0 +1,36 @@
+body {
+    font-family: 'Roboto', sans-serif;
+}
+
+.content-chapter {
+    background: #f9f7f1;
+    font-size: 16px;
+    color: hsl(0, 0%, 18%);
+    padding: 10px;
+    border: double 3px #d4d4d4;
+    width: 100%;
+}
+
+.navbar-item.is-mega {
+    position: static;
+}
+
+.navbar-item.is-mega .is-mega-menu-title {
+    margin-bottom: 0;
+    padding: 0.375rem 1rem;
+}
+
+.user {
+    background: #fff;
+    padding: 5px;
+    border: 1px solid #eee;
+    margin-bottom: 5px;
+}
+
+.is-dead {
+    background: rgb(148, 146, 146);
+}
+
+.is-dead .name {
+    text-decoration: line-through;
+}
