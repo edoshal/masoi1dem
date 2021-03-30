@@ -34,7 +34,7 @@ include_once 'header.php';
 <section class="section">
     <div class="container">
         <div class="has-text-centered" id="services-text-container">
-            <h1 class="title is-1">Ma sói</h1>
+            <h1 class="title is-1">Ma sói 1 đêm</h1>
             <h4 class="subtitle">
                 Chơi ma sói mọi lúc mọi nơi
             </h4>

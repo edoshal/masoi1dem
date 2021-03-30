@@ -16,26 +16,17 @@ include_once 'header.php'; ?>
             <br />
             <div v-for="item in items" :key="item.username" class="user" v-bind:class="{'is-dead': item.status == 0}">
                 <div class="name">
+                    <div v-if="myrole.role_id == 22 || myrole.role_id == 17 || myrole.role_id == 3 || myrole.role_id == 23 || myrole.role_id == 5">
+                        <input type="checkbox" v-bind:id="item.id" v-bind:value="item.id" v-model="checkedMember">
+                        Chọn người này<br />
+                    </div>
                     <i class="fas fa-user-secret"></i> {{ item.username }}<br />
                     <i class="fas fa-coins"></i> Điểm: {{item.point}}<br />
                     <?php if ($session->isadmin) { ?>
-                        <div class="field">
-                            <div class="control has-icons-left">
-                                <div class="select">
-                                    <select>
-                                        <?php foreach ($fullroles as $role) : ?>
-                                            <option value="<?= $role->id ?>" ><?= $role->name ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                                <div class="icon is-small is-left">
-                                    <i class="fas fa-award"></i>
-                                </div>
-                            </div>
+                        <i class="fas fa-award"></i> {{item.name}}<br />
+                        <div v-if="item.role_id == 3">
+                            <i class="fas fa-angry"></i> {{item.target}}
                         </div>
-
-                        <i class="fas fa-award"></i> {{item.name}}
-
                     <?php
                     } ?>
                     </span>
@@ -49,6 +40,38 @@ include_once 'header.php'; ?>
                         <a class="tag is-warning" v-if="item.status == 0" v-on:click="revival(item.id)">Hồi sinh</a>
                     <?php } ?>
                     </div>
+            </div>
+
+
+            <div v-if="myrole.role_id == 22">
+                <center><button class="button is-link is-rounded" v-on:click="trombai">Đổi 2 bài này</button></center>
+            </div>
+            <div v-if="myrole.role_id == 17">
+                <center><button class="button is-link is-rounded" v-on:click="nhanban">Nhân bản nó</button></center>
+            </div>
+            <div v-if="myrole.role_id == 3">
+                <center><button class=" button is-link is-rounded" v-on:click="keotheo">Kéo theo nó</button></center>
+            </div>
+            <div v-if="myrole.role_id == 23">
+                <center><button class="button is-link is-rounded" v-on:click="doi2bai">Đổi 2 bài này</button></center>
+            </div>
+            <div v-if="myrole.role_id == 5">
+                <center><button class="button is-link is-rounded" v-on:click="tientri">Tiên tri nó</button></center>
+            </div>
+            <br />
+            <div class="modal " v-bind:class="{'is-active': viewmodal}">
+                <div class="modal-background"></div>
+                <div class="modal-card">
+                    <header class="modal-card-head">
+                        <p class="modal-card-title">Thông báo</p>
+                    </header>
+                    <section class="modal-card-body">
+                        {{contentmodal}}
+                    </section>
+                    <footer class="modal-card-foot">
+                        <button class="button is-success" v-on:click="viewmodal = !viewmodal">Tớ hiểu rồi</button>
+                    </footer>
+                </div>
             </div>
             <center><button class="button is-link is-rounded" v-on:click="view = !view">Lật/Úp Bài</button></center>
             <div v-if="view">

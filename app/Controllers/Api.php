@@ -156,6 +156,52 @@ class Api extends BaseController
 		}
 	}
 
+	public function trombai()
+	{
+		$request = \Config\Services::request();
+		$room = $request->getVar('room');
+		$target = $request->getVar('target');
+
+		$masoiModel = new \App\Models\MasoiModel();
+		return $this->respond($masoiModel->Trombai($room, $target));
+	}
+	public function nhanban()
+	{
+		$request = \Config\Services::request();
+		$room = $request->getVar('room');
+		$target = $request->getVar('target');
+
+		$masoiModel = new \App\Models\MasoiModel();
+		return $this->respond($masoiModel->Nhanban($room, $target));
+	}
+	public function keotheo()
+	{
+		$request = \Config\Services::request();
+		$room = $request->getVar('room');
+		$target = $request->getVar('target');
+
+		$masoiModel = new \App\Models\MasoiModel();
+		return $this->respond($masoiModel->Keotheo($room, $target));
+	}
+	public function doi2bai()
+	{
+		$request = \Config\Services::request();
+		$room = $request->getVar('room');
+		$target = $request->getVar('target');
+
+		$masoiModel = new \App\Models\MasoiModel();
+		return $this->respond($masoiModel->Doi2bai($room, $target));
+	}
+	public function tientri()
+	{
+		$request = \Config\Services::request();
+		$room = $request->getVar('room');
+		$target = $request->getVar('target');
+
+		$masoiModel = new \App\Models\MasoiModel();
+		return $this->respond($masoiModel->Tientri($room, $target));
+	}
+
 	//generate role
 	public function generate()
 	{
@@ -167,6 +213,7 @@ class Api extends BaseController
 		if ($session->isadmin) {
 			$masoiModel = new \App\Models\MasoiModel();
 			$listMember = $masoiModel->GetListMemberOnly($room);
+			
 			shuffle($listMember);
 			// if(count($listMember) < 6) return;
 			$assignRole = true;

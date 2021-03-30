@@ -2,10 +2,13 @@ var app = new Vue({
     el: '#app',
     data: {
         view: false,
+        viewmodal: false,
+        contentmodal: "",
         setting: {
             woft: 0,
             checkedRole: [],
         },
+        checkedMember: [],
         myrole: {
             name: "Chưa nhận",
             note: ""
@@ -55,6 +58,81 @@ var app = new Vue({
         },
     },
     methods: {
+        trombai: function() {
+            var self = this;
+            var data = { room: room, target: this.checkedMember };
+
+            axios.post('/doi2bai', null, { params: data }).then(function(response) {
+                console.log(response.data);
+                self.contentmodal = response.data;
+                self.viewmodal = true;
+                self.view = false;
+            }).catch(function(error) {
+                self.contentmodal = "Lỗi hệ thống rồi";
+                self.viewmodal = true;
+                console.log(error);
+            });
+        },
+        nhanban: function() {
+            var self = this;
+            var data = { room: room, target: this.checkedMember };
+
+            axios.post('/nhanban', null, { params: data }).then(function(response) {
+                console.log(response.data);
+                self.contentmodal = response.data;
+                self.viewmodal = true;
+                self.view = false;
+            }).catch(function(error) {
+                self.contentmodal = "Lỗi hệ thống rồi";
+                self.viewmodal = true;
+                console.log(error);
+            });
+        },
+        keotheo: function() {
+            var self = this;
+            var data = { room: room, target: this.checkedMember };
+
+            axios.post('/keotheo', null, { params: data }).then(function(response) {
+                console.log(response.data);
+                self.contentmodal = response.data;
+                self.viewmodal = true;
+                self.view = false;
+            }).catch(function(error) {
+                self.contentmodal = "Lỗi hệ thống rồi";
+                self.viewmodal = true;
+                console.log(error);
+            });
+        },
+        doi2bai: function() {
+            var self = this;
+            var data = { room: room, target: this.checkedMember };
+
+            axios.post('/doi2bai', null, { params: data }).then(function(response) {
+                console.log(response.data);
+                self.contentmodal = response.data;
+                self.viewmodal = true;
+                self.view = false;
+            }).catch(function(error) {
+                self.contentmodal = "Lỗi hệ thống rồi";
+                self.viewmodal = true;
+                console.log(error);
+            });
+        },
+        tientri: function() {
+            var self = this;
+            var data = { room: room, target: this.checkedMember };
+
+            axios.post('/tientri', null, { params: data }).then(function(response) {
+                console.log(response.data);
+                self.contentmodal = response.data;
+                self.viewmodal = true;
+                self.view = false;
+            }).catch(function(error) {
+                self.contentmodal = "Lỗi hệ thống rồi";
+                self.viewmodal = true;
+                console.log(error);
+            });
+        },
         generateGame: function() {
             var self = this;
             var data = { room: room, roles: this.setting.checkedRole, woft: this.setting.woft };
