@@ -28,8 +28,6 @@ class MasoiModel extends Model
                 'isAdmin'  => TRUE,
                 'role' => 21
             ];
-
-
         } else {
             $data = [
                 'username' => $username,
@@ -47,6 +45,8 @@ class MasoiModel extends Model
             $data['isBot'] = true;
             $data['isAdmin'] = false;
             $data['role'] = 20;
+            $data['point'] = 0;
+
             $builder2->insert($data);
 
 
@@ -67,6 +67,8 @@ class MasoiModel extends Model
         $builder->select('game.*');
         $builder->select('role.id as role_id');
         $builder->select('role.name');
+        $builder->select('role2.id realrole_id');
+        $builder->select('role2.name realrole');
         $builder->select('role.note');
         $builder->select('role.img');
         $builder->select('role.team');
@@ -74,18 +76,36 @@ class MasoiModel extends Model
         $builder->where('room', $room);
         // $builder->where('lastping >= now() - interval 10 second');
         $builder->join('role', 'game.role = role.id');
+        $builder->join('role as role2', 'game.realrole = role2.id');
         $builder->orderBy('point', 'DESC');
 
         $query = $builder->get();
 
         return $query->getResult();
     }
+
+    // get history
+    function GetHistory($room)
+    {
+        $db      = \Config\Database::connect();
+        $builder = $db->table('log');
+        $builder->select('log.*');
+        $builder->where(
+            'room',
+            $room
+        );
+        $builder->orderBy('dttm', 'ASC');
+        $query = $builder->get();
+        return $query->getResult();
+    }
+
     function GetListMemberOnly($room)
     {
         $db      = \Config\Database::connect();
         $builder = $db->table('game');
         $builder->where('room', $room);
         $builder->where('isAdmin', 0);
+        $builder->where('status', 1);
         // $builder->where('lastping >= now() - interval 10 second');
         $query = $builder->get();
 
@@ -139,7 +159,9 @@ class MasoiModel extends Model
         $db      = \Config\Database::connect();
         $builder = $db->table('game');
         $builder->set('role', $role);
+        $builder->set('realrole', $role);
         $builder->set('status', 1);
+        $builder->set('donejob', 0);
         $builder->where('id', $uid);
         $builder->update();
     }
@@ -195,32 +217,51 @@ class MasoiModel extends Model
 
 
     //Revival
-    // function Trombai($room, $target)
-    // {
-    //     $session = \Config\Services::session();
-    //     $rolefrom = $this->GetRoleById($session->get("id"))->role_id;
-    //     $roleto = $this->GetRoleById($target[0])->role_id;
-    //     $roletoName = $this->GetRoleById($target[0])->name;
-    //     $db      = \Config\Database::connect();
-     
-    //     $builder = $db->table('game');
-    //     $builder->set('role', $rolefrom);
-    //     $builder->where('id', $target[0]);
-    //     $builder->update();
+    function Trombai($room, $target)
+    {
+        $session = \Config\Services::session();
+        $rolefrom = $this->GetRoleById($session->get("id"))->role_id;
+        $rolefromName = $this->GetRoleById($session->get("id"))->username;
 
-    //     $builder2 = $db->table('game');
-    //     $builder2->set('role', $roleto);
-    //     $builder2->where('id', $session->get("id"));
-    //     $builder2->update();
+        $roleto = $this->GetRoleById($target[0])->role_id;
+        $roletoName = $this->GetRoleById($target[0])->name;
+        $roletoUserName = $this->GetRoleById($target[0])->username;
+        $db      = \Config\Database::connect();
 
-    //     return "Đổi thành công, bây giờ bạn là ". $roletoName;
-    // }
+        $builder = $db->table('game');
+        $builder->set('realrole', $rolefrom);
+        $builder->where('id', $target[0]);
+        $builder->update();
+
+        $builder2 = $db->table('game');
+        $builder2->set('realrole', $roleto);
+        $builder2->where('id', $session->get("id"));
+        $builder2->update();
+        $this->SetMeDone();
+
+        $this->addLog($room,  $rolefromName . " đã trộm bài của " . $roletoUserName);
+        return "Trộm bài thành công, bây giờ bạn là " . $roletoName;
+    }
 
     //Revival
     function Nhanban($room, $target)
     {
         $db      = \Config\Database::connect();
-    
+        $session = \Config\Services::session();
+        $rolefromName = $this->GetRoleById($session->get("id"))->username;
+
+        $roleto = $this->GetRoleById($target[0])->role_id;
+        $roletoName = $this->GetRoleById($target[0])->name;
+        $roletoUserName = $this->GetRoleById($target[0])->username;
+        $db      = \Config\Database::connect();
+
+        $builder2 = $db->table('game');
+        $builder2->set('role', $roleto);
+        $builder2->where('id', $session->get("id"));
+        $builder2->update();
+
+        $this->addLog($room,  $rolefromName . " đã nhân bản bài của " . $roletoUserName);
+        return "Nhân bản bài thành công, bây giờ bạn là " . $roletoName;
     }
     //Revival
     function Keotheo($room, $target)
@@ -231,50 +272,134 @@ class MasoiModel extends Model
         $builder->set('target', $this->GetRoleById($target[0])->username);
         $builder->where('id', $session->get("id"));
         $builder->update();
+        $this->SetMeDone();
+
+
+        $rolefromName = $this->GetRoleById($session->get("id"))->username;
+        $roletoName = $this->GetRoleById($target[0])->username;
+
+        $this->addLog($room,  $rolefromName . " đã kéo theo " . $roletoName);
+
         return "Bạn vừa bắn thẳng mặt " . $this->GetRoleById($target[0])->username;
     }
     //Revival
     function Doi2bai($room, $target)
     {
         $db      = \Config\Database::connect();
+        $session = \Config\Services::session();
 
-        $roleto = $this->GetRoleById($target[0])->role_id;
-        $rolefrom = $this->GetRoleById($target[1])->role_id;
+        $roleto = $this->GetRoleById($target[0])->realrole;
+        $rolefrom = $this->GetRoleById($target[1])->realrole;
         $db      = \Config\Database::connect();
 
         $builder = $db->table('game');
-        $builder->set('role', $rolefrom);
+        $builder->set('realrole', $rolefrom);
         $builder->where('id', $target[0]);
         $builder->update();
 
         $builder2 = $db->table('game');
-        $builder2->set('role', $roleto);
+        $builder2->set('realrole', $roleto);
         $builder2->where('id', $target[1]);
         $builder2->update();
+        $this->SetMeDone();
 
+        $rolefromName = $this->GetRoleById($session->get("id"))->username;
+        $roletoName = $this->GetRoleById($target[0])->username;
+
+        $this->addLog($room,  "Kẻ gây rối đã đổi bài của " . $roletoName . " và " . $rolefromName);
         return "Đổi thành công bài của 2 đứa đó rồi đó.";
     }
     //Revival
     function Tientri($room, $target)
     {
+        $session = \Config\Services::session();
+        $rolefromName = $this->GetRoleById($session->get("id"))->username;
+
         $role1 = $this->GetRoleById($target[0])->name;
         $role1Name = $this->GetRoleById($target[0])->username;
         $str = "Thằng " . $role1Name . " là " . $role1;
+
+        $this->addLog($room,  $rolefromName . " đã tiên tri bài của " . $role1Name);
+
         if (count($target) == 2) {
             $role2 = $this->GetRoleById($target[1])->name;
             $role2Name = $this->GetRoleById($target[1])->username;
             $str .= ". Còn thằng " . $role2Name . " thì là " . $role2;
+            $this->addLog($room,  $rolefromName . " đã tiên tri bài của " . $role2Name);
         }
+        $this->SetMeDone();
+
+
         return $str;
     }
 
+    function SetMeDone()
+    {
+        $session = \Config\Services::session();
+        $db      = \Config\Database::connect();
+        $builder = $db->table('game');
+        $builder->set('donejob', 1);
+        $builder->where('id', $session->get("id"));
+        $builder->update();
+    }
+    function SetHideAll($room)
+    {
+        $db      = \Config\Database::connect();
+        $builder = $db->table('game');
+        $builder->set('donejob', 1);
+        $builder->where('game.room', $room);
+        $builder->update();
+    }
 
+    function SetShowHis($room)
+    {
+        $db      = \Config\Database::connect();
+        $builder = $db->table('game');
+        $builder->set(
+            'showhis',
+            1
+        );
+        $builder->where('game.room', $room);
+        $builder->update();
+    }
+    function SetHideHis($room)
+    {
+        $db      = \Config\Database::connect();
+        $builder = $db->table('game');
+        $builder->set(
+            'showhis',
+            0
+        );
+        $builder->where('game.room', $room);
+        $builder->update();
+
+        $this->deleteAllLog($room);
+    }
+    function addLog($room, $message)
+    {
+        $db      = \Config\Database::connect();
+        $builder2 = $db->table('log');
+        $data = [
+            'room'  => $room,
+            'log'  => $message
+        ];
+
+        $builder2->insert($data);
+    }
+
+    function deleteAllLog($room)
+    {
+        $db      = \Config\Database::connect();
+        $builder = $db->table('log');
+        $builder->delete(['room' => $room]);
+    }
     //ping status
     function GetMyRole()
     {
         $session = \Config\Services::session();
         $db      = \Config\Database::connect();
         $builder = $db->table('game');
+        $builder->select('game.*');
         $builder->select('role.id as role_id');
         $builder->select('name');
         $builder->select('note');
@@ -301,5 +426,14 @@ class MasoiModel extends Model
         $builder->where('game.id', $uid);
         $query = $builder->get();
         return $query->getRow();
+    }
+
+    function GetRoleNameId($roleid)
+    {
+        $db      = \Config\Database::connect();
+        $builder = $db->table('role');
+        $builder->where('id', $roleid);
+        $query = $builder->get();
+        return $query->getRow()->name;
     }
 }

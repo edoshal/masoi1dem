@@ -9,6 +9,7 @@ body {
     padding: 10px;
     border: double 3px #d4d4d4;
     width: 100%;
+    padding-bottom: 100px;
 }
 
 .navbar-item.is-mega {
@@ -33,4 +34,21 @@ body {
 
 .is-dead .name {
     text-decoration: line-through;
+}
+
+.member {
+    background: hsl(204, 86%, 53%);
+    padding: 5px;
+    position: fixed;
+    z-index: 1000;
+    bottom: 0;
+    width: 100%;
+    color: #fff;
+    font-weight: bold;
+}
+
+.log {
+    background-color: #fff;
+    padding: 5px;
+    border: solid 1px #eee;
 }

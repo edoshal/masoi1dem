@@ -39,6 +39,17 @@ class Api extends BaseController
 	}
 
 	//ping
+	public function gethis()
+	{
+		$request = \Config\Services::request();
+		$room = $request->getVar('room');
+
+		$masoiModel = new \App\Models\MasoiModel();
+		return $this->respond($masoiModel->GetHistory($room));
+	}
+
+
+	//ping
 	public function GetRole()
 	{
 		$masoiModel = new \App\Models\MasoiModel();
@@ -202,6 +213,29 @@ class Api extends BaseController
 		return $this->respond($masoiModel->Tientri($room, $target));
 	}
 
+
+	public function showhis()
+	{
+		$request = \Config\Services::request();
+		$room = $request->getVar('room');
+		$session = \Config\Services::session();
+		if ($session->isadmin) {
+			$masoiModel = new \App\Models\MasoiModel();
+			$masoiModel->SetShowHis($room);
+		}
+	}
+
+	public function sethideall()
+	{
+		$request = \Config\Services::request();
+		$room = $request->getVar('room');
+		$session = \Config\Services::session();
+		if ($session->isadmin) {
+			$masoiModel = new \App\Models\MasoiModel();
+			$masoiModel->SetHideAll($room);
+		}
+	}
+
 	//generate role
 	public function generate()
 	{
@@ -209,11 +243,13 @@ class Api extends BaseController
 		$roles = $request->getVar("roles");
 		$numWoft = $request->getVar("woft");
 		$room = $request->getVar('room');
+
 		$session = \Config\Services::session();
 		if ($session->isadmin) {
 			$masoiModel = new \App\Models\MasoiModel();
 			$listMember = $masoiModel->GetListMemberOnly($room);
-			
+			$masoiModel->SetHideHis($room);
+
 			shuffle($listMember);
 			// if(count($listMember) < 6) return;
 			$assignRole = true;
@@ -222,15 +258,19 @@ class Api extends BaseController
 				if ($numWoft > 0) {
 					$masoiModel->SetRole($listMember[$x]->id, 1);
 					$numWoft--;
+					$masoiModel->addLog($room, $listMember[$x]->username." được chỉ định là sói");
 				} else if ($assignRole) {
 					foreach ($roles as &$role) {
 						$masoiModel->SetRole($listMember[$x]->id, $role);
+						$masoiModel->addLog($room, $listMember[$x]->username . " được chỉ định chức năng " . $masoiModel->GetRoleNameId($role));
 						$x++;
 					}
 					$assignRole = false;
 					$x--;
 				} else {
 					$masoiModel->SetRole($listMember[$x]->id, 6);
+					$masoiModel->addLog($room, $listMember[$x]->username . " được chỉ định là dân");
+
 				}
 			}
 		}

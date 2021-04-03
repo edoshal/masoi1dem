@@ -14,6 +14,7 @@ var app = new Vue({
             note: ""
         },
         items: [],
+        history: [],
         user: {
             username: null,
             room: null
@@ -40,10 +41,18 @@ var app = new Vue({
             }).catch(function(error) {
                 console.log(error);
             });
+            axios.post('/gethis', null, { params: data }).then(function(response) {
+                if (self.history != response.data) {
+                    self.history = response.data;
+                }
+            }).catch(function(error) {
+                console.log(error);
+            });
 
             axios.post('/getrole', null, { params: data }).then(function(response) {
                 if (self.myrole != response.data) {
                     self.myrole = response.data;
+                    console.log(response.data);
                 }
             }).catch(function(error) {
                 console.log(error);
@@ -62,11 +71,11 @@ var app = new Vue({
             var self = this;
             var data = { room: room, target: this.checkedMember };
 
-            axios.post('/doi2bai', null, { params: data }).then(function(response) {
-                console.log(response.data);
+            axios.post('/trombai', null, { params: data }).then(function(response) {
                 self.contentmodal = response.data;
                 self.viewmodal = true;
                 self.view = false;
+                self.checkedMember = [];
             }).catch(function(error) {
                 self.contentmodal = "Lỗi hệ thống rồi";
                 self.viewmodal = true;
@@ -78,10 +87,11 @@ var app = new Vue({
             var data = { room: room, target: this.checkedMember };
 
             axios.post('/nhanban', null, { params: data }).then(function(response) {
-                console.log(response.data);
                 self.contentmodal = response.data;
                 self.viewmodal = true;
                 self.view = false;
+                self.checkedMember = [];
+
             }).catch(function(error) {
                 self.contentmodal = "Lỗi hệ thống rồi";
                 self.viewmodal = true;
@@ -93,10 +103,11 @@ var app = new Vue({
             var data = { room: room, target: this.checkedMember };
 
             axios.post('/keotheo', null, { params: data }).then(function(response) {
-                console.log(response.data);
                 self.contentmodal = response.data;
                 self.viewmodal = true;
                 self.view = false;
+                self.checkedMember = [];
+
             }).catch(function(error) {
                 self.contentmodal = "Lỗi hệ thống rồi";
                 self.viewmodal = true;
@@ -108,10 +119,11 @@ var app = new Vue({
             var data = { room: room, target: this.checkedMember };
 
             axios.post('/doi2bai', null, { params: data }).then(function(response) {
-                console.log(response.data);
                 self.contentmodal = response.data;
                 self.viewmodal = true;
                 self.view = false;
+                self.checkedMember = [];
+
             }).catch(function(error) {
                 self.contentmodal = "Lỗi hệ thống rồi";
                 self.viewmodal = true;
@@ -123,10 +135,11 @@ var app = new Vue({
             var data = { room: room, target: this.checkedMember };
 
             axios.post('/tientri', null, { params: data }).then(function(response) {
-                console.log(response.data);
                 self.contentmodal = response.data;
                 self.viewmodal = true;
                 self.view = false;
+                self.checkedMember = [];
+
             }).catch(function(error) {
                 self.contentmodal = "Lỗi hệ thống rồi";
                 self.viewmodal = true;
@@ -138,7 +151,6 @@ var app = new Vue({
             var data = { room: room, roles: this.setting.checkedRole, woft: this.setting.woft };
 
             axios.post('/generate', null, { params: data }).then(function(response) {
-                console.log(response.data);
                 self.view = false;
             }).catch(function(error) {
                 console.log(error);
@@ -149,8 +161,27 @@ var app = new Vue({
             var data = { room: room };
 
             axios.post('/clearRoles', null, { params: data }).then(function(response) {
-                console.log(response.data);
                 self.view = false;
+            }).catch(function(error) {
+                console.log(error);
+            });
+        },
+        showhis: function() {
+            var self = this;
+            var data = { room: room };
+
+            axios.post('/showhis', null, { params: data }).then(function(response) {
+                self.view = false;
+            }).catch(function(error) {
+                console.log(error);
+            });
+        },
+        hideall: function() {
+            var self = this;
+            var data = { room: room };
+
+            axios.post('/sethideall', null, { params: data }).then(function(response) {
+                console.log(data);
             }).catch(function(error) {
                 console.log(error);
             });
