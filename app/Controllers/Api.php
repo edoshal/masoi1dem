@@ -165,6 +165,7 @@ class Api extends BaseController
 				$masoiModel->SetRole($listMember[$x]->id, 20);
 			}
 		}
+		$masoiModel->deleteAllLog($room);
 	}
 
 	public function trombai()

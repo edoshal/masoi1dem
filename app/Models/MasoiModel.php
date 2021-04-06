@@ -303,10 +303,11 @@ class MasoiModel extends Model
         $builder2->update();
         $this->SetMeDone();
 
-        $rolefromName = $this->GetRoleById($session->get("id"))->username;
+        $roleTrouble = $this->GetRoleById($session->get("id"))->username;
+        $rolefromName = $this->GetRoleById($target[1])->username;
         $roletoName = $this->GetRoleById($target[0])->username;
 
-        $this->addLog($room,  "Kẻ gây rối đã đổi bài của " . $roletoName . " và " . $rolefromName);
+        $this->addLog($room,  $roleTrouble. " (Kẻ gây rối) đã đổi bài của " . $roletoName . " và " . $rolefromName);
         return "Đổi thành công bài của 2 đứa đó rồi đó.";
     }
     //Revival
