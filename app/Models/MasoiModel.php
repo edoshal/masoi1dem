@@ -222,25 +222,30 @@ class MasoiModel extends Model
         $session = \Config\Services::session();
         $rolefrom = $this->GetRoleById($session->get("id"))->role_id;
         $rolefromName = $this->GetRoleById($session->get("id"))->username;
+        if (count($target) == 1) {
 
-        $roleto = $this->GetRoleById($target[0])->role_id;
-        $roletoName = $this->GetRoleById($target[0])->name;
-        $roletoUserName = $this->GetRoleById($target[0])->username;
-        $db      = \Config\Database::connect();
+            $roleto = $this->GetRoleById($target[0])->role_id;
+            $roletoName = $this->GetRoleById($target[0])->name;
+            $roletoUserName = $this->GetRoleById($target[0])->username;
+            $db      = \Config\Database::connect();
 
-        $builder = $db->table('game');
-        $builder->set('realrole', $rolefrom);
-        $builder->where('id', $target[0]);
-        $builder->update();
+            $builder = $db->table('game');
+            $builder->set('realrole', $rolefrom);
+            $builder->where('id', $target[0]);
+            $builder->update();
 
-        $builder2 = $db->table('game');
-        $builder2->set('realrole', $roleto);
-        $builder2->where('id', $session->get("id"));
-        $builder2->update();
-        $this->SetMeDone();
+            $builder2 = $db->table('game');
+            $builder2->set('realrole', $roleto);
+            $builder2->where('id', $session->get("id"));
+            $builder2->update();
+            $this->SetMeDone();
 
-        $this->addLog($room,  $rolefromName . " đã trộm bài của " . $roletoUserName);
-        return "Trộm bài thành công, bây giờ bạn là " . $roletoName;
+            $this->addLog($room,  $rolefromName . " đã trộm bài của " . $roletoUserName);
+            return "Trộm bài thành công, bây giờ bạn là " . $roletoName;
+        } else {
+            $this->addLog($room,  $rolefromName . " chọn " . count($target) . " người nên không thành trộm.");
+            return "Trộm thất bại, cần chọn 1 người để trộm.";
+        }
     }
 
     //Revival
@@ -254,14 +259,19 @@ class MasoiModel extends Model
         $roletoName = $this->GetRoleById($target[0])->name;
         $roletoUserName = $this->GetRoleById($target[0])->username;
         $db      = \Config\Database::connect();
+        if (count($target) == 1) {
 
-        $builder2 = $db->table('game');
-        $builder2->set('role', $roleto);
-        $builder2->where('id', $session->get("id"));
-        $builder2->update();
+            $builder2 = $db->table('game');
+            $builder2->set('role', $roleto);
+            $builder2->set('realrole', $roleto);
+            $builder2->where('id', $session->get("id"));
+            $builder2->update();
 
-        $this->addLog($room,  $rolefromName . " đã nhân bản bài của " . $roletoUserName);
-        return "Nhân bản bài thành công, bây giờ bạn là " . $roletoName;
+            $this->addLog($room,  $rolefromName . " đã nhân bản bài của " . $roletoUserName);
+            return "Nhân bản bài thành công, bây giờ bạn có vai trò là " . $roletoName . ", hãy thực hiện chức năng.";
+        } else {
+            return "Vui lòng chọn 1 người để nhân bản.";
+        }
     }
     //Revival
     function Keotheo($room, $target)
@@ -274,13 +284,19 @@ class MasoiModel extends Model
         $builder->update();
         $this->SetMeDone();
 
+        if (count($target) == 1) {
+            $rolefromName = $this->GetRoleById($session->get("id"))->username;
+            $roletoName = $this->GetRoleById($target[0])->username;
 
-        $rolefromName = $this->GetRoleById($session->get("id"))->username;
-        $roletoName = $this->GetRoleById($target[0])->username;
+            $this->addLog($room,  $rolefromName . " đã kéo theo " . $roletoName);
 
-        $this->addLog($room,  $rolefromName . " đã kéo theo " . $roletoName);
+            return "Bạn vừa bắn thẳng mặt " . $this->GetRoleById($target[0])->username;
+        } else {
+            $rolefromName = $this->GetRoleById($session->get("id"))->username;
+            $this->addLog($room,  $rolefromName . " kéo theo nhầm ");
 
-        return "Bạn vừa bắn thẳng mặt " . $this->GetRoleById($target[0])->username;
+            return "Vui lòng chọn 1 người để kéo theo.";
+        }
     }
     //Revival
     function Doi2bai($room, $target)
@@ -292,23 +308,29 @@ class MasoiModel extends Model
         $rolefrom = $this->GetRoleById($target[1])->realrole;
         $db      = \Config\Database::connect();
 
-        $builder = $db->table('game');
-        $builder->set('realrole', $rolefrom);
-        $builder->where('id', $target[0]);
-        $builder->update();
+        if (count($target) == 2) {
+            $builder = $db->table('game');
+            $builder->set('realrole', $rolefrom);
+            $builder->where('id', $target[0]);
+            $builder->update();
 
-        $builder2 = $db->table('game');
-        $builder2->set('realrole', $roleto);
-        $builder2->where('id', $target[1]);
-        $builder2->update();
-        $this->SetMeDone();
+            $builder2 = $db->table('game');
+            $builder2->set('realrole', $roleto);
+            $builder2->where('id', $target[1]);
+            $builder2->update();
+            $this->SetMeDone();
 
-        $roleTrouble = $this->GetRoleById($session->get("id"))->username;
-        $rolefromName = $this->GetRoleById($target[1])->username;
-        $roletoName = $this->GetRoleById($target[0])->username;
+            $roleTrouble = $this->GetRoleById($session->get("id"))->username;
+            $rolefromName = $this->GetRoleById($target[1])->username;
+            $roletoName = $this->GetRoleById($target[0])->username;
 
-        $this->addLog($room,  $roleTrouble. " (Kẻ gây rối) đã đổi bài của " . $roletoName . " và " . $rolefromName);
-        return "Đổi thành công bài của 2 đứa đó rồi đó.";
+            $this->addLog($room,  $roleTrouble . " (Kẻ gây rối) đã đổi bài của " . $roletoName . " và " . $rolefromName);
+            return "Đổi thành công bài của 2 đứa đó rồi đó.";
+        } else {
+            $roleTrouble = $this->GetRoleById($session->get("id"))->username;
+            $this->addLog($room,  $roleTrouble . " chọn " . count($target) . " người nên không thành công.");
+            return "Đổi thất bại, cần chọn 2 người để đổi.";
+        }
     }
     //Revival
     function Tientri($room, $target)
@@ -325,8 +347,10 @@ class MasoiModel extends Model
         if (count($target) == 2) {
             $role2 = $this->GetRoleById($target[1])->name;
             $role2Name = $this->GetRoleById($target[1])->username;
-            $str .= ". Còn thằng " . $role2Name . " thì là " . $role2;
-            $this->addLog($room,  $rolefromName . " đã tiên tri bài của " . $role2Name);
+            if ($this->GetRoleById($target[0])->isBot && $this->GetRoleById($target[1])->isBot) {
+                $str .= ". Còn thằng " . $role2Name . " thì là " . $role2;
+                $this->addLog($room,  $rolefromName . " đã tiên tri bài của " . $role2Name);
+            }
         }
         $this->SetMeDone();
 
